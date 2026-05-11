@@ -25,10 +25,10 @@ class Node
 
 public:
     // конструктор: задаёт имя узла
-    Node(const std::string &aname) : name(aname) {}
+    Node(const string &aname) : name(aname) {}
 
     // получить имя узла
-    const std::string &getName() const { return name; }
+    const string &getName() const { return name; }
 
     // получить вес ребра до указанного сосед
     int getWeight(Node *neighbour) const;
@@ -84,7 +84,7 @@ public:
 class DFS
 {
     const Graph &graph;
-    std::set<Node *> visited;   // множество посещённых узлов
+    set<Node *> visited;   // множество посещённых узлов
 
     // приватная рек реализация
     bool connected(Node *begin, Node *end, int depth);
@@ -113,7 +113,7 @@ struct MarkedNode
 // извлечение элемента с минзначением
 class PriorityQueue
 {
-    std::vector<MarkedNode> nodes;
+    vector<MarkedNode> nodes;
 
 public:
     // извлечь узел с мин меткой и удалить его 
@@ -150,4 +150,4 @@ public:
 };
 
 // развернуть путь от end до begin,
-Way unroll(std::map<Node *, MarkedNode> visited, Node *begin, Node *curr);
+Way unroll(map<Node *, MarkedNode> visited, Node *begin, Node *curr);
