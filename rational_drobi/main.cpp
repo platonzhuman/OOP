@@ -26,7 +26,7 @@ int main(void)
     else
         cout << "Правильно!" << endl;
 
-    Rational::kvadrat(Rational(1), Rational(-5), Rational(6));
+    Rational::kvadrat(Rational(1), Rational(-3532,13923), Rational(209,13923));
     
     return 0;
 }

@@ -137,31 +137,35 @@ Rational Rational::operator*(const Rational& r) const
 }
 //=== kvadrat uravnenie ===
 
-
-Rational operator*(int i, const Rational& j) 
+Rational operator*(long long i, const Rational& j) 
 {
-    return Rational(i * j.numer, j.denom);
+    // приводим все к лонг
+    long long safe_numer = i * (long long)j.numer;
+    long long safe_denom = (long long)j.denom;
+    
+    // само образует в инт
+    return Rational(static_cast<int>(safe_numer), static_cast<int>(safe_denom));
 }
 
 void Rational::kvadrat(const Rational& a, const Rational& b, const Rational& c) {
     cout << "Uravnenie: (" << a << ")x^2 + (" << b << ")x + (" << c << ") = 0" << endl;
 
-    Rational Dis = (b * b) - (4 * a * c);
-    
-    double d = Dis; 
+    double a_d = (double)a;
+    double b_d = (double)b;
+    double c_d = (double)c;
+
+    // пк выделит под дабл 64 бита а этого достачтоно
+    double d = (b_d * b_d) - (4.0 * a_d * c_d);
     
     if (d < 0) {
-        cout << "Net realnih korney" << endl;
+        cout << "Net realnih korney (D < 0)" << endl;
         return;
     }
 
-    double a_d = a;
-    double b_d = b;
-    
     double sqrtD = sqrt(d);          
       
-    Rational x1 = (-b_d + sqrtD) / (2 * a_d);
-    Rational x2 = (-b_d - sqrtD) / (2 * a_d);
+    double x1 = (-b_d + sqrtD) / (2.0 * a_d);
+    double x2 = (-b_d - sqrtD) / (2.0 * a_d);
 
     cout << "x1 = " << x1 << endl;
     cout << "x2 = " << x2 << endl;
