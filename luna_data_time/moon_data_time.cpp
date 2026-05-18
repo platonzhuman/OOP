@@ -169,57 +169,65 @@ Datatime::Datatime(int ymd, int hms) {
     }
 }
 
+
+// rebreading mon otdelenie
+
+MoonEvents calculateMoonEvents(const Datatime t[3], const double e[3], const bool has[3], MoonEvents currentEvents) {
+    if (!has[0] || !has[1]) return currentEvents;
+
+    double p = e[0]; // предыдущая точка
+    double c = e[1]; // текущая точка 
+
+    // восход
+    if (!currentEvents.hasRise && p < 0 && c >= 0) {
+        currentEvents.rise = t[1];
+        currentEvents.hasRise = true;
+    }
+    // заход
+    if (!currentEvents.hasSet && p >= 0 && c < 0) {
+        currentEvents.set = t[1];
+        currentEvents.hasSet = true;
+    }
+    // пик
+    if (has[2] && !currentEvents.hasCulm && p < c && c > e[2] && c > 0) {
+        currentEvents.culm = t[1];
+        currentEvents.hasCulm = true;
+    }
+
+    return currentEvents;
+}
+
+
 void printMoonEvents(FILE* f, const string& dateStr, int y, int m, int d) {
-    // data for we check
     int targetYmd = y * 10000 + m * 100 + d;  
     
     char buf[256];
-    fgets(buf, sizeof(buf), f);  
+    fgets(buf, sizeof(buf), f); // пропуск заголовка
     
-    // tree tochki
-    Datatime t[3];      // time
-    double e[3];        //ugol
-    bool has[3] = {false, false, false};  // check danue
+    Datatime t[3];      
+    double e[3];        
+    bool has[3] = {false, false, false};  
     
     int ymd, hms;
     double tm, r, el, az, fi, lg;
+    MoonEvents events;
     
-    Datatime rise, culm, set;
-    bool okRise = false, okCulm = false, okSet = false;
-    
-    // readd file
     while (fscanf(f, "%d %d %lf %lf %lf %lf %lf %lf", 
                   &ymd, &hms, &tm, &r, &el, &az, &fi, &lg) == 8) {
         
-        
         if (ymd != targetYmd) continue;
         
-        // sdvig weindow
+        
         t[0] = t[1];  e[0] = e[1];  has[0] = has[1];
         t[1] = t[2];  e[1] = e[2];  has[1] = has[2];
         t[2] = Datatime(ymd, hms);  e[2] = el;  has[2] = true;
         
-        // check sered
-        if (!has[0] || !has[1]) continue; 
-        
-        double p = e[0], c = e[1]; 
-        
-        // vos
-        if (!okRise && p < 0 && c >= 0) {
-            rise = t[1]; okRise = true;
-        }
-        // zax
-        if (!okSet && p >= 0 && c < 0) {
-            set = t[1]; okSet = true;
-        }
-        //pik
-        if (has[2] && !okCulm && p < c && c > e[2] && c > 0) {
-            culm = t[1]; okCulm = true;
-        }
+        // вызов функции вычислений
+        events = calculateMoonEvents(t, e, has, events);
     }
     
     cout << "дата: " << dateStr << endl;
-    cout << "восход луны: " << (okRise ? rise : Datatime()) << endl;
-    cout << "кульминация луны: " << (okCulm ? culm : Datatime()) << endl;
-    cout << "заход Луны: " << (okSet ? set : Datatime()) << endl;
+    cout << "восход луны: " << (events.hasRise ? events.rise : Datatime()) << endl;
+    cout << "пик луны: " << (events.hasCulm ? events.culm : Datatime()) << endl;
+    cout << "заход Луны: " << (events.hasSet ? events.set : Datatime()) << endl;
 }

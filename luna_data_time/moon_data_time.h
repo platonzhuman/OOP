@@ -41,5 +41,14 @@ public:
     friend ostream& operator<<(ostream& out, const Datatime& dt); 
 };
 
+struct MoonEvents {
+    Datatime rise;
+    Datatime culm;
+    Datatime set;
+    bool hasRise = false;
+    bool hasCulm = false;
+    bool hasSet = false;
+};
+
 
 void printMoonEvents(FILE* f, const string& dateStr, int y, int m, int d);
