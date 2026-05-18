@@ -1,41 +1,34 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# читаем данные из файла ! ! !
-data = np.loadtxt('result.csv', delimiter=',', skiprows=1)  # пропускаем первую строку с k
-n = data[:, 0].astype(int)               # это N
-time_linelist = data[:, 1]               # это время :)
-
-# читаем k из первой строки
-with open('result.csv', 'r') as f:
-    first_line = f.readline().strip()
-    k = int(first_line.split(',')[1])
-
-
+n = np.array([1000, 5000, 10000, 50000, 100000, 500000, 1000000])
+time_linelist = np.array([5.2736e-05, 0.000251648, 0.000507203, 0.00262865, 0.00463409, 0.0254149, 0.0544436])
 time_array = np.array([0.001498, 0.035686, 0.113774, 1.69566, 8.54363, 160.82, 520.498])
 
-# помогающие линии для асимптотик
-k_plot = np.linspace(0, 1_000_000, 100)
-o_n = (time_linelist[-1] / n[-1]) * k_plot
-o_n2 = (time_linelist[-1] / (n[-1]**2)) * (k_plot**2)
+k = np.linspace(0, 1_000_000, 100)
+o_n = (time_linelist[-1] / n[-1]) * k
+o_n2 = (time_linelist[-1] / (n[-1]**2)) * (k**2)
 
-# построение графиков
+ratio = time_array / time_linelist
+kof = np.mean(ratio)
+print(f"средне отношение time_array / time_linelist = {kof:.2f}")
+
 fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 6))
 
-ax1.plot(n, time_linelist, 'o-', label=f'LineList (k={k})', color='tab:blue', linewidth=2)
-ax1.plot(k_plot, o_n, '--', label='O(N)', color='tab:orange')
-ax1.plot(k_plot, o_n2, ':', label='O(N²)', color='tab:green')
-ax1.set_title('Зависимость времени от N (LineList)')
+ax1.plot(n, time_linelist, 'o-', label='LineList', color='tab:blue', linewidth=2)
+ax1.plot(k, o_n, '--', label='O(N)', color='tab:orange')
+ax1.plot(k, o_n2, ':', label='O(N²)', color='tab:green')
+ax1.set_title('зависимость времени от N (LineList)')
 ax1.set_xlabel('N')
-ax1.set_ylabel('Время (сек)')
+ax1.set_ylabel('время (сек)')
 ax1.grid(True)
 ax1.legend()
 
-ax2.loglog(n, time_linelist, 'o-', label=f'LineList (k={k})', color='tab:blue', linewidth=2)
-ax2.loglog(n, time_array, 's-', label='Array (пример)', color='tab:red', linewidth=2)
-ax2.set_title('Сравнение двух реализаций')
+ax2.loglog(n, time_linelist, 'o-', label='LineList', color='tab:blue', linewidth=2)
+ax2.loglog(n, time_array, 's-', label='Array', color='tab:red', linewidth=2)
+ax2.set_title('сравнение двух реализаций')
 ax2.set_xlabel('N')
-ax2.set_ylabel('Время (сек)')
+ax2.set_ylabel('время (сек)')
 ax2.grid(True, which='both', linestyle='--', linewidth=0.5)
 ax2.legend()
 

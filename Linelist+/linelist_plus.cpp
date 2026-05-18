@@ -2,49 +2,43 @@
 #include <iostream>
 using namespace std;
 
-// Тут мы реализуем методы элементов списка 
 template <class T>
-LineListElem<T>::LineListElem(const T& adata, LineListElem<T>* anext)
+LineListElem<T>::LineListElem(const T &adata, LineListElem<T> *anext)
 {
     data = adata;
     next = anext;
 }
 
 template <class T>
-const T& LineListElem<T>::getData() const
+const T &LineListElem<T>::getData() const
 {
     return data;
 }
 
 template <class T>
-LineListElem<T>* LineListElem<T>::getNext()
+LineListElem<T> *LineListElem<T>::getNext()
 {
     return next;
 }
 
-// тут мы реализуем методы списка
-
-// Удаляем самый первый элемент
 template <class T>
 void LineList<T>::deleteFirst()
 {
     if (start)
     {
-        LineListElem<T>* temp = start->next;
+        LineListElem<T> *temp = start->next;
         delete start;
-        start = temp;   // теперь начало – бывший второй элемент == nullptr
+        start = temp;
+        if (!start)
+            last = nullptr;
     }
-    else throw LineListException();   // нельзя удалить из пустого списка
+    else
+        throw LineListException();
 }
 
-// пустой конструктор
 template <class T>
-LineList<T>::LineList()
-{
-    start = 0;
-}
+LineList<T>::LineList() : start(nullptr), last(nullptr) {}
 
-// деструктор  = пока есть элементы, удаляем с первого
 template <class T>
 LineList<T>::~LineList()
 {
@@ -52,50 +46,54 @@ LineList<T>::~LineList()
         deleteFirst();
 }
 
-// вставка в начало. Работает по принципу его next = старый start
 template <class T>
-void LineList<T>::insertFirst(const T& data)
+void LineList<T>::insertFirst(const T &data)
 {
-    LineListElem<T>* second = start;
+    LineListElem<T> *second = start;
     start = new LineListElem<T>(data, second);
+    if (!last)
+        last = start;
 }
 
-// удаление элемента, который идёт после ptr
 template <class T>
-void LineList<T>::deleteAfter(LineListElem<T>* ptr)
+void LineList<T>::deleteAfter(LineListElem<T> *ptr)
 {
-    if (ptr && ptr->next)   // если есть сам ptr, и следующий за ним
+    if (ptr && ptr->next)
     {
-        LineListElem<T>* temp = ptr->next;
-        ptr->next = ptr->next->next;   // перекидываем связь через удаляемый
+        LineListElem<T> *temp = ptr->next;
+        ptr->next = ptr->next->next;
+        if (temp == last)
+            last = ptr;
+        if (temp == start)
+            start = ptr->next;
         delete temp;
     }
-    else throw LineListException();
+    else
+        throw LineListException();
 }
 
-// вставка нового элемента после ptr
 template <class T>
-void LineList<T>::insertAfter(LineListElem<T>* ptr, const T& data)
+void LineList<T>::insertAfter(LineListElem<T> *ptr, const T &data)
 {
     if (ptr)
     {
-        LineListElem<T>* temp = ptr->next;
-        ptr->next = new LineListElem<T>(data, temp);   // вставляем между ptr и temp
+        LineListElem<T> *temp = ptr->next;
+        ptr->next = new LineListElem<T>(data, temp);
+        if (ptr == last)
+            last = ptr->next;
     }
 }
 
-// возвращает начало списка
 template <class T>
-LineListElem<T>* LineList<T>::getStart()
+LineListElem<T> *LineList<T>::getStart()
 {
     return start;
 }
 
-// Вывод списка в терминал
 template <class T>
-ostream& operator<<(ostream& out, const LineList<T>& list)
+ostream &operator<<(ostream &out, const LineList<T> &list)
 {
-    LineListElem<T>* ptr = list.start;
+    LineListElem<T> *ptr = list.start;
     if (!ptr)
         out << "EMPTY ";
     else
@@ -107,65 +105,72 @@ ostream& operator<<(ostream& out, const LineList<T>& list)
     return out;
 }
 
-// IOSEV
+// Добавил
 
+// Замыкает список в кольцо
 template <class T>
-T LineList<T>::iosev(int k)
+void LineList<T>::makeCircular()
 {
-    // проверка на пустой список
-    if (start == nullptr)
-        throw LineListException();
-    
-    // ищет последний элемент и считает общее количество этих элеметов
-    LineListElem<T>* last = start;
-    int count = 1;
-    while (last->next != nullptr)
-    {
-        last = last->next;
-        ++count;
-    }
-    // Зымыкание, когда последний элемент указывает на первый
-    last->next = start;
-
-    // Двигаемся по кругу K шагами удаляя жлементы
-
-    LineListElem<T>* prew = last;   // элемент перед тем, кого будем удалять
-    LineListElem<T>* curent = start; // удаляемый элемент
-
-    while(count > 1)  
-    {
-        // этот цикл делает k - 1 шагов вперед
-        for (int i = 0; i < k - 1 ; ++i)
-        {
-            prew = curent;
-            curent = curent->next;
-        }
-        // перебрасываем указатель на след элемент и удаляем curent
-        prew->next = curent->next;
-        delete curent;
-
-        // теперь след элем стал текущим
-        curent = prew->next;
-        --count; 
-    }
-
-    // результат в виде одного числа 
-    T result = curent->data;
-
-    // Тут происходит разрыв кольца
-    curent->next = nullptr;
-    start = curent;
-
-    return result;
+    // Присваиваем ссылку на start последнему элементу
+    if (start && last)
+        last->next = start;
 }
 
+// Размыкает список
+template <class T>
+void LineList<T>::breakCircular()
+{
+    if (!start)
+        return;
+    // Присваиваем 0 last->next
+    if (last && last->next == start)
+        last->next = nullptr;
+}
 
-// тут все для linelist<int>
+// Иосиф Флавий
+int Iosif_Flavia(int n, int k)
+{
+    if (n <= 0)
+        return -1;
+    if (n == 1)
+        return 1;
 
-// создают все методы класса 
+    LineList<int> list;
+
+    // Заполнение списка
+    list.insertFirst(1);
+    LineListElem<int> *last = list.getStart();
+    for (int i = 2; i <= n; ++i)
+    {
+        list.insertAfter(last, i);
+        last = last->getNext();
+    }
+
+    // Замыкание
+    list.makeCircular();
+
+    LineListElem<int> *current = last;
+    int count_n = n;
+
+    // Иосиф
+    while (count_n > 1)
+    {
+        // Делаем k-1 переходов, чтобы встать перед элементом, который нужно удалить
+        for (int i = 0; i < k - 1; ++i)
+        {
+            current = current->getNext();
+        }
+
+        // Удаляем следующий элемент
+        list.deleteAfter(current);
+        --count_n;
+    }
+    // Получение ответа и размыкание списка
+    int answer = current->getNext()->getData();
+    list.breakCircular();
+    return answer;
+}
+
 template class LineListElem<int>;
 template class LineList<int>;
-
-
-// создает конкретную версию оператора
-template ostream& operator<<(ostream& out, const LineList<int>& list);
+template ostream &operator<<(ostream &, const LineList<int> &);
