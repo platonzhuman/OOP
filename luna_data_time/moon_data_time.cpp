@@ -212,19 +212,22 @@ void printMoonEvents(FILE* f, const string& dateStr, int y, int m, int d) {
     double tm, r, el, az, fi, lg;
     MoonEvents events;
     
-    while (fscanf(f, "%d %d %lf %lf %lf %lf %lf %lf", 
-                  &ymd, &hms, &tm, &r, &el, &az, &fi, &lg) == 8) {
-        
+    while (fgets(buf, sizeof(buf), f)) {
+        int n = sscanf(buf, "%d %d %lf %lf %lf %lf %lf %lf",
+                    &ymd, &hms, &tm, &r, &el, &az, &fi, &lg);
+        if (n == 7) el = r;   // без Т (время в дес часах) колонки
+        else if (n != 8) continue;
+
         if (ymd != targetYmd) continue;
-        
-        
+
         t[0] = t[1];  e[0] = e[1];  has[0] = has[1];
         t[1] = t[2];  e[1] = e[2];  has[1] = has[2];
         t[2] = Datatime(ymd, hms);  e[2] = el;  has[2] = true;
-        
-        // вызов функции вычислений
+
+        // вызов функций вычислений
         events = calculateMoonEvents(t, e, has, events);
     }
+
     
     cout << "дата: " << dateStr << endl;
     cout << "восход луны: " << (events.hasRise ? events.rise : Datatime()) << endl;
