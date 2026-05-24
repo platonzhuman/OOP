@@ -15,7 +15,7 @@ int main() {
     shapes.push_back(new Ellipse(pt1, 5, 4));
     shapes.push_back(new Rectangle(pt1, pt2));
     shapes.push_back(new Triangle(pt1, pt2, pt3));
-    shapes.push_back(new Polygon("granitsy-uchastka2.txt"));
+    shapes.push_back(new Polygon("granichi_uchastka.txt"));
 
     for (size_t i = 0; i < shapes.size(); ++i) {
         shapes[i]->name();
