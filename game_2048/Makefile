@@ -1,7 +1,7 @@
 CXX     = g++
 CXXFLAGS = -Iinclude
 
-SRC = main.cpp src/board.cpp src/renderer.cpp src/input.cpp src/color.cpp src/game.cpp
+SRC = main.cpp src/board.cpp src/renderer.cpp src/input.cpp src/color.cpp src/game.cpp src/demo.cpp
 OUT = program
 
 all: $(OUT)
